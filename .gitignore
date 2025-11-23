@@ -1,4 +1,6 @@
+# ============================================================================
 # Python
+# ============================================================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -16,73 +18,215 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# Virtual environments
+# ============================================================================
+# Virtual Environments
+# ============================================================================
 venv/
 env/
 ENV/
-.venv
+.venv/
+.env.venv/
+env.bak/
+venv.bak/
+pythonenv*/
 
-# IDEs
+# ============================================================================
+# IDEs & Editors
+# ============================================================================
+# VSCode
 .vscode/
+.vscode-test/
+*.code-workspace
+
+# PyCharm / IntelliJ
 .idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
 *.swp
 *.swo
 *~
-.DS_Store
+.vim/
 
-# Environment variables
+# Emacs
+*~
+\#*\#
+.\#*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================================================
+# Environment Variables & Secrets
+# ============================================================================
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.staging
+.env.test
+*.env
+secrets/
+.secrets/
 
-# Testing
+# ============================================================================
+# Testing & Coverage
+# ============================================================================
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 .tox/
+.nox/
 .hypothesis/
+coverage.xml
+*.cover
+.cache
+nosetests.xml
+test-results/
+junit.xml
 
+# ============================================================================
 # Logs
+# ============================================================================
 *.log
 logs/
+log/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
+# ============================================================================
 # Database
+# ============================================================================
 *.db
 *.sqlite
 *.sqlite3
+*.db-shm
+*.db-wal
+db.sqlite3
+local.db
 
-# Recordings & Media
+# ============================================================================
+# Recordings & Media Files
+# ============================================================================
 recordings/
+uploads/
+media/
 *.wav
 *.mp3
 *.ogg
+*.flac
+*.m4a
+*.aac
+*.wma
 
-# Temporary files
+# ============================================================================
+# Temporary Files
+# ============================================================================
 tmp/
 temp/
 *.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+.cache/
 
+# ============================================================================
 # Docker
+# ============================================================================
 .dockerignore
+docker-compose.override.yml
+.docker/
 
+# ============================================================================
+# Infrastructure as Code
+# ============================================================================
 # Terraform
 .terraform/
 *.tfstate
+*.tfstate.*
 *.tfstate.backup
 .terraform.lock.hcl
+terraform.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
-# OS
-Thumbs.db
-.DS_Store
+# Pulumi
+.pulumi/
+Pulumi.*.yaml
 
-# Jupyter
+# Ansible
+*.retry
+
+# ============================================================================
+# Kubernetes
+# ============================================================================
+*.kubeconfig
+kubeconfig
+.kube/
+
+# ============================================================================
+# Monitoring & Observability
+# ============================================================================
+# Prometheus
+prometheus_data/
+prometheus/data/
+
+# Grafana
+grafana_data/
+grafana/data/
+
+# Tempo
+tempo_data/
+
+# ============================================================================
+# Jupyter Notebooks
+# ============================================================================
 .ipynb_checkpoints/
+*.ipynb_checkpoints
+profile_default/
+ipython_config.py
 
+# ============================================================================
+# Type Checking & Linting
+# ============================================================================
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -90,4 +234,51 @@ dmypy.json
 
 # Ruff
 .ruff_cache/
+
+# Pylint
+.pylint.d/
+
+# pyright
+.pyright/
+
+# ============================================================================
+# Documentation
+# ============================================================================
+docs/_build/
+docs/.doctrees/
+site/
+.mkdocs_cache/
+
+# ============================================================================
+# Package Managers
+# ============================================================================
+# pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Poetry
+poetry.lock
+
+# PDM
+.pdm.toml
+__pypackages__/
+
+# ============================================================================
+# CI/CD
+# ============================================================================
+.github/workflows/*.log
+.gitlab-ci-local/
+
+# ============================================================================
+# Misc
+# ============================================================================
+.vscode-server/
+.history/
+*.pid
+*.seed
+*.pid.lock
+.DS_Store?
+Icon?
+.Spotlight-V100
+.Trashes
 
