@@ -1,0 +1,156 @@
+# Docker Compose configuration for Neura Call Center
+# Updated for Docker Compose v2 (2025 latest) - version field is obsolete
+
+services:
+  # PostgreSQL with pgvector
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: neura-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: neura_call_center
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - neura-network
+
+  # Valkey (Redis alternative)
+  valkey:
+    image: valkey/valkey:7.2-alpine
+    container_name: neura-valkey
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey_data:/data
+    command: valkey-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - neura-network
+
+  # RabbitMQ (Message Queue)
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: neura-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - neura-network
+
+  # API Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: neura-api
+    environment:
+      - APP_ENV=development
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/neura_call_center
+      - CACHE_URL=redis://valkey:6379/0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - PROMETHEUS_METRICS_PORT=9464
+      - ENABLE_TRACING=true
+      - ENABLE_METRICS=true
+    ports:
+      - "8080:8080"
+      - "9464:9464"
+    volumes:
+      - ./apps:/app/apps
+      - ./tests:/app/tests
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8080 --reload
+    networks:
+      - neura-network
+
+  # Prometheus (Metrics)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: neura-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - neura-network
+
+  # Grafana (Dashboards)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: neura-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    ports:
+      - "3002:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+      - tempo
+    networks:
+      - neura-network
+
+  # Grafana Tempo (Distributed Tracing)
+  tempo:
+    image: grafana/tempo:latest
+    container_name: neura-tempo
+    user: "0:0"  # Run as root to avoid permission issues
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    ports:
+      - "3200:3200"   # Tempo HTTP
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    volumes:
+      - ./infrastructure/tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo_data:/tmp/tempo
+    networks:
+      - neura-network
+
+volumes:
+  postgres_data:
+  valkey_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:
+  tempo_data:
+
+networks:
+  neura-network:
+    driver: bridge
+
